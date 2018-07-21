@@ -1,0 +1,28 @@
+{
+  "name": "shalvah.me",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "develop": "node browserify.js --debug > dist/bundle.js",
+    "bundle": "node browserify.js > dist/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/shalvah/shalvah.me"
+  },
+  "author": "Shalvah Adebayo <hello@shalvah.me>",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "chalkie": "0.0.12",
+    "commander": "^2.16.0",
+    "inquirer": "^6.0.0",
+    "shalvah": "^1.0.2",
+    "xterm": "^3.4.1"
+  },
+  "devDependencies": {
+    "aliasify": "^2.1.0",
+    "browserify": "^16.2.2"
+  }
+}
