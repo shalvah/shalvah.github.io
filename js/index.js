@@ -9,9 +9,10 @@ const COLOURS = {
 const PROMPT = `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd]('/')} > `;
 
 const term = createTerminal();
-setUpTermEventHandlers(term);
-setUpShims(term);
-setUpTermUi(term);
+setUpTermEventHandlers();
+setUpShims();
+setUpTermUi();
+setTimeout(startTerminalSession, 1000);
 
 const commandHistory = [];
 let historyIndex = 0;
@@ -32,7 +33,7 @@ function createTerminal() {
         fontSize: '16',
     });
 
-    term.writeWithPrompt = function (...args) {
+    term.writeThenPrompt = function (...args) {
         this.writeln(...args);
         this.write(PROMPT);
         this.focus();
@@ -157,7 +158,7 @@ function setUpTermEventHandlers(term) {
     });
 
     term.on('line-processed', () => {
-        term.writeWithPrompt('');
+        term.writeThenPrompt('');
         process.running = false;
     });
 }
@@ -206,7 +207,7 @@ function setUpShims(term) {
     process.kill = () => {
         process.running = false;
         term.writeln('');
-        term.writeWithPrompt('');
+        term.writeThenPrompt('');
     };
 
     /*
@@ -229,7 +230,7 @@ function setUpShims(term) {
 function setUpTermUi(term) {
     term.open(document.getElementById('terminal'));
     term.fit();
-    term.writeWithPrompt('');
+    term.writeThenPrompt('');
     term.focus();
 }
 
@@ -246,4 +247,13 @@ function showHistoryItem(index) {
         term.write(' ' + pieces.shift());
     }
     term.textarea.value = text;
+}
+
+function startTerminalSession() {
+    term.writeln(chalk[COLOURS.command]('npm') + ' install -g shalvah');
+    term.writeln('');
+    term.writeln('added 1 package in 0.00s');
+    term.writeThenPrompt('');
+    term.write(chalk[COLOURS.command]('shalvah'));
+    term.textarea.value = 'shalvah';
 }
