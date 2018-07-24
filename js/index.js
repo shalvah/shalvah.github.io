@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');
+
 const COLOURS = {
     user: 'red',
     pwd: 'blue',
@@ -19,6 +20,33 @@ let historyIndex = 0;
 window.process = process;
 window.term = term;
 
+function createTerminal() {
+    const Terminal = require('xterm').Terminal;
+    const fit = require('xterm/lib/addons/fit/fit');
+    Terminal.applyAddon(fit);
+
+    const term = new Terminal({
+        cursorBlink: true,
+        convertEol: true,
+        fontFamily: 'Consolas',
+        fontSize: '16',
+    });
+
+    term.writeWithPrompt = function (...args) {
+        this.writeln(...args);
+        this.write(PROMPT);
+        this.focus();
+        this.showCursor();
+    };
+    term.newLine = function () {
+        let value = this.textarea.value;
+        this.textarea.value = "";
+        this.emit('newline', { text: value });
+    };
+
+    return term;
+}
+
 function setUpTermEventHandlers(term) {
 
     term.on('key', (key, ev) => {
@@ -35,8 +63,10 @@ function setUpTermEventHandlers(term) {
             } else if (Number(ev.key)) {
                 ev.value = ev.key;
             }
-            console.log(term.textarea.value)
             if (ev.key === 'Enter') {
+                // There's a wweird bug I'm experiencing
+                // where the first two triggers of this 'line' event
+                // are being ignored; hence the hack
                 term.emit('line');
                 term.emit('line');
                 term.emit('line');
@@ -154,6 +184,9 @@ function setUpShims(term) {
         }
     };
 
+    /*
+     * Required for Inquirer.js
+     */
     process.binding = (name) => {
         return (name === 'constants') ? require('constants') : {};
     };
@@ -191,33 +224,6 @@ function setUpShims(term) {
             originalConsoleError(...args);
         }
     };
-}
-
-function createTerminal() {
-    const Terminal = require('xterm').Terminal;
-    const fit = require('xterm/lib/addons/fit/fit');
-    Terminal.applyAddon(fit);
-
-    const term = new Terminal({
-        cursorBlink: true,
-        convertEol: true,
-        fontFamily: 'Consolas',
-
-    });
-
-    term.writeWithPrompt = function (...args) {
-        this.writeln(...args);
-        this.write(PROMPT);
-        this.focus();
-        this.showCursor();
-    };
-    term.newLine = function () {
-        let value = this.textarea.value;
-        this.textarea.value = "";
-        this.emit('newline', { text: value });
-    };
-
-    return term;
 }
 
 function setUpTermUi(term) {
