@@ -48,7 +48,7 @@ function createTerminal() {
     return term;
 }
 
-function setUpTermEventHandlers(term) {
+function setUpTermEventHandlers() {
 
     term.on('key', (key, ev) => {
         if (process.running) {
@@ -112,6 +112,7 @@ function setUpTermEventHandlers(term) {
         }
     });
 
+    // just because I'm a nice guy, I'll let folks paste commands
     term.on('paste', function (data, ev) {
         term.write(data);
     });
@@ -163,7 +164,20 @@ function setUpTermEventHandlers(term) {
     });
 }
 
-function setUpShims(term) {
+/*
+ * Be warned:
+ * 1. Not all shims are in this function. Some are spread across other functions
+ * 2. These shims are specific to my use case.
+ *    They don't bring full Inquirer/Commander compatibility to xterm,
+ *    only compatibility for the functions I needed
+ */
+function setUpShims() {
+    /*
+     * Is another program currently in the foreground (for instance, Inquirer.js)?
+     * Who am I kidding, that's the only example on this site.
+     */
+    process.running = false;
+
     /*
      * The most important shim. Used by both Commander and Inquirer.
      * We're tricking them into thinking xterm is a TTY
@@ -227,7 +241,7 @@ function setUpShims(term) {
     };
 }
 
-function setUpTermUi(term) {
+function setUpTermUi() {
     term.open(document.getElementById('terminal'));
     term.fit();
     term.writeThenPrompt('');
