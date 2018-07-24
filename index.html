@@ -1,11 +1,19 @@
 <html>
 <head>
     <link rel="stylesheet" href="node_modules/xterm/dist/xterm.css"/>
-    <link rel="stylesheet" href="node_modules/xterm/lib/addons/fullscreen/fullscreen.css"/>
 </head>
 
+<style>
+    .content {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+    }
+</style>
 <body>
+<div class="content">
 <div id="terminal"></div>
+</div>
 
 <script src="dist/bundle.js"></script>
 </body>
