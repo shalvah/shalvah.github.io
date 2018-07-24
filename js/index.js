@@ -1,15 +1,22 @@
 const chalk = require('chalk');
-const PROMPT = `${chalk.red('root')} @ ${chalk.blue('/')} > `;
+const stripAnsi = require('strip-ansi');
+const COLOURS = {
+    user: 'red',
+    pwd: 'blue',
+    command: 'cyan',
+};
+const PROMPT = `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd]('/')} > `;
 
 const term = createTerminal();
 setUpTermEventHandlers(term);
 setUpShims(term);
 setUpTermUi(term);
 
-let commandHistory = [];
+const commandHistory = [];
 let historyIndex = 0;
 
-console.log(process);
+// just attaching these for easy inspection on the fly
+window.process = process;
 window.term = term;
 
 function setUpTermEventHandlers(term) {
@@ -46,13 +53,15 @@ function setUpTermEventHandlers(term) {
         if (ev.key === 'Enter') {
             term.newLine();
         } else if (ev.key === 'Backspace') {
-            // Do not delete the prompt
-            if (term.buffer.x > PROMPT.length) {
+            // confession: this implementation of Backspace is buggy; 🙈
+            // it only works when the cursor is at line's
+
+            // don't delete the prompt!
+            if (term.buffer.x > stripAnsi(PROMPT).length) {
                 term.write('\b \b');
             }
             const value = term.textarea.value;
             term.textarea.value = value.slice(0, value.length - 1);
-            console.log(term.textarea.value);
         } else if (ev.key === 'ArrowUp') {
             if (historyIndex > 0) {
                 showHistoryItem(--historyIndex);
@@ -64,8 +73,8 @@ function setUpTermEventHandlers(term) {
                 console.log(historyIndex)
             }
         } else if (printable) {
-            if(term.textarea.value.split(/\s+/).length < 2 && key !== ' ') {
-                term.write(chalk.cyan(key));
+            if (term.textarea.value.split(/\s+/).length < 2 && key !== ' ') {
+                term.write(chalk[COLOURS.command](key));
             } else {
                 term.write(key);
             }
@@ -162,9 +171,9 @@ function setUpShims(term) {
      * For inquirer.js to exit when Ctrl-C is pressed
      */
     process.kill = () => {
-      process.running = false;
-      term.writeln();
-      term.writeWithPrompt('');
+        process.running = false;
+        term.writeln('');
+        term.writeWithPrompt('');
     };
 
     /*
@@ -220,8 +229,15 @@ function setUpTermUi(term) {
 
 function showHistoryItem(index) {
     let text = commandHistory[index] === undefined ? '' : commandHistory[index];
-    while (term.buffer.x > PROMPT.length) {
+    let i = term.buffer.x;
+    while (i > stripAnsi(PROMPT).length) {
         term.write('\b \b');
+        i--;
     }
-    term.write(text);
+    const pieces = text.split(/\s+/);
+    term.write(chalk[COLOURS.command](pieces.shift()));
+    while (pieces.length) {
+        term.write(' ' + pieces.shift());
+    }
+    term.textarea.value = text;
 }
