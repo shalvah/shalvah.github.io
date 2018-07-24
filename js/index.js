@@ -6,13 +6,13 @@ const COLOURS = {
     pwd: 'blue',
     command: 'cyan',
 };
-const PROMPT = `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd]('/')} > `;
+const PROMPT = `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd]('~/')} > `;
 
 const term = createTerminal();
 setUpTermEventHandlers();
 setUpShims();
 setUpTermUi();
-setTimeout(startTerminalSession, 1000);
+setTimeout(startTerminalSession, 500);
 
 const commandHistory = [];
 let historyIndex = 0;
