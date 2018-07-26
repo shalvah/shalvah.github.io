@@ -42,6 +42,9 @@ window.currentDirectoryPath = 'root';
 window.process = process;
 window.term = term;
 
+alert(screen.height)
+alert(screen.width)
+
 function createTerminal() {
     const Terminal = require('xterm').Terminal;
 
