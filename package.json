@@ -18,6 +18,7 @@
     "chalkie": "0.0.12",
     "commander": "^2.16.0",
     "inquirer": "^6.0.0",
+    "lodash.get": "^4.4.2",
     "shalvah": "^1.0.2",
     "strip-ansi": "^4.0.0",
     "xterm": "^3.4.1"

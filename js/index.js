@@ -6,7 +6,12 @@ const COLOURS = {
     pwd: 'blue',
     command: 'cyan',
 };
-const PROMPT = `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd]('~/')} > `;
+window.PROMPT_CHAR = '>';
+const PROMPT = () => {
+    let pwd;
+    pwd = window.hasChangedDirectory ? '/' + window.currentDirectoryPath : '~';
+    return `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd](pwd)} ${PROMPT_CHAR} `;
+};
 
 const term = createTerminal();
 setUpTermEventHandlers();
@@ -16,6 +21,20 @@ setTimeout(startTerminalSession, 500);
 
 const commandHistory = [];
 let historyIndex = 0;
+window.paths = {
+    bin: {},
+    boot: {},
+    dev: {},
+    etc: {},
+    home: {},
+    lib: {},
+    mnt: {},
+    root: {},
+    usr: {bin: {}, lib: {}},
+    var: {log: {}}
+};
+window.currentDirectory = window.paths.root;
+window.currentDirectoryPath = 'root';
 
 // just attaching these for easy inspection on the fly
 window.process = process;
@@ -36,7 +55,7 @@ function createTerminal() {
 
     term.writeThenPrompt = function (...args) {
         this.writeln(...args);
-        this.write(PROMPT);
+        this.write(PROMPT());
         this.focus();
         this.showCursor();
     };
@@ -110,7 +129,7 @@ function setUpTermEventHandlers() {
             // it only works when the cursor is at line's
 
             // don't delete the prompt!
-            if (term.buffer.x > stripAnsi(PROMPT).length) {
+            if (term.buffer.x > stripAnsi(PROMPT()).length) {
                 term.write('\b \b');
             }
             const value = term.textarea.value;
@@ -140,47 +159,40 @@ function setUpTermEventHandlers() {
     });
 
     term.on('newline', (line) => {
+        const recognisedCommands = ['shalvah', 'help', 'ls', 'pwd', 'cd', 'exit', 'rm'];
         let argv = line.text.split(/\s+/);
+        if (argv[0] === 'sudo') {
+            argv.shift();
+            if (argv[1] && recognisedCommands.includes(argv[1])) {
+                window.tempSudo = true;
+            } else {
+                window.sudo = true;
+                PROMPT_CHAR = '#';
+            }
+
+        }
+
         if (!argv[0]) {
             term.emit('line-processed');
             return;
-        }
 
+        }
         // output should start from the next line
         term.write('\r\n');
         process.running = true;
         historyIndex = commandHistory.push(line.text);
-        const recognisedCommands = ['shalvah'];
         if (!recognisedCommands.includes(argv[0])) {
             term.writeln('Unknown command: ' + argv[0]);
             term.emit('line-processed');
             return;
         }
 
-        const program = require('commander');
-        program.version('1.0.0')
-            .description('Shalvah on your command-line')
-            .parse([''].concat(argv));
-        const shalvah = require('shalvah');
-        const inquirer = require('inquirer');
-        term.writeln(shalvah.bio);
-        inquirer.prompt({
-            name: 'link',
-            type: 'list',
-            message: shalvah.prompt,
-            choices: shalvah.links.concat({
-                'name': `...Or shoot me an email (${shalvah.email})`,
-                'value': 'mailto:' + shalvah.email
-            })
-        }).then(answers => {
-            term.writeln(`Opening ${answers.link}`);
-            window.open(answers.link);
-            term.emit('line-processed');
-        });
-
+        let program = require('./programs')[argv.shift()];
+        program(argv);
     });
 
     term.on('line-processed', () => {
+        window.tempSudo && (window.tempSudo = false);
         term.writeThenPrompt('');
         process.running = false;
     });
@@ -264,15 +276,19 @@ function setUpShims() {
 }
 
 function setUpTermUi() {
-    term.open(document.getElementById('terminal'));
-    term.writeThenPrompt('');
+    const terminalElement = document.getElementById('terminal');
+    term.open(terminalElement);
+    const titleBarElement = document.querySelector('.title-bar');
+    titleBarElement.style.width = terminalElement.clientWidth;
+    titleBarElement.style.display = 'block';
+    term.writeThenPrompt("Shalvah CLI 1.0. Try playing around with the terminal to see what's in the box. If you're stuck, type 'help' for a list of commands. Type 'exit' to quit.\r\n");
     term.focus();
 }
 
 function showHistoryItem(index) {
     let text = commandHistory[index] === undefined ? '' : commandHistory[index];
     let i = term.buffer.x;
-    while (i > stripAnsi(PROMPT).length) {
+    while (i > stripAnsi(PROMPT()).length) {
         term.write('\b \b');
         i--;
     }
@@ -289,6 +305,5 @@ function startTerminalSession() {
     term.writeln('');
     term.writeln('added 1 package in 0.00s');
     term.writeThenPrompt('');
-    term.write(chalk[COLOURS.command]('shalvah'));
-    term.textarea.value = 'shalvah';
 }
+
