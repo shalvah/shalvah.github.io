@@ -4,7 +4,7 @@ Source of [my personal site](https://shalvah.me).
 
 [insert GIF here]
 
-I built this using [Xterm.js](https://xtermjs.org/) for the command-line UI, and [Commander.js](https://github.com/tj/commander.js/), [Inquirer.js](https://github.com/SBoudrias/Inquirer.js/), and [Chalk](https://github.com/chalk/chalk/) for the CLI utilities. These last three are primarily designed for Node.js, so I used [Browserify](https://github.com/browserify/browserify) to hack around that.
+I built this using [Xterm.js](https://xtermjs.org/) for the command-line UI, and [Commander.js](https://github.com/tj/commander.js/), [Inquirer.js](https://github.com/SBoudrias/Inquirer.js/), and [Chalk](https://github.com/chalk/chalk/) for the CLI utilities. These last three are primarily designed for Node.js, so I used [Browserify](https://github.com/browserify/browserify) (with the [Aliasify transform](https://github.com/benbria/aliasify)) to hack around that.
 
 Finally, I plugged in [shalvah](http://github.com/shalvah/shalvah), my SaaNP (Site-as-an-NPM-Package —okay, I coined that) for the content.
 
