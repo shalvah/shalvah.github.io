@@ -43,6 +43,8 @@ window.term = term;
 function createTerminal() {
     const Terminal = require('xterm').Terminal;
 
+    alert(window.innerWidth)
+    alert(window.innerHeight)
     // make the terminal window responsive: calculate how many rows and cols it needs
     const term = new Terminal({
         cursorBlink: true,
