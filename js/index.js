@@ -23,14 +23,15 @@ window.term = term;
 
 function createTerminal() {
     const Terminal = require('xterm').Terminal;
-    const fit = require('xterm/lib/addons/fit/fit');
-    Terminal.applyAddon(fit);
 
+    // make the terminal window responsive: calculate how many rows and cols it needs
     const term = new Terminal({
         cursorBlink: true,
         convertEol: true,
         fontFamily: 'Consolas',
         fontSize: '16',
+        rows: calculateNumberOfTerminalRows(),
+        cols: calculateNumberOfTerminalCols(),
     });
 
     term.writeThenPrompt = function (...args) {
@@ -39,6 +40,7 @@ function createTerminal() {
         this.focus();
         this.showCursor();
     };
+
     term.newLine = function () {
         let value = this.textarea.value;
         this.textarea.value = "";
@@ -46,6 +48,26 @@ function createTerminal() {
     };
 
     return term;
+
+    function calculateNumberOfTerminalRows() {
+        let testElement = document.createElement('div');
+        testElement.innerText = 'h';
+        testElement.style.visibility = 'hidden';
+        document.querySelector('.term-container').append(testElement);
+        testElement.style.fontSize = '16px';
+        let fontHeight = testElement.clientHeight + 1;
+        testElement.remove();
+        return Math.floor(window.innerHeight * 0.8 / fontHeight);
+    }
+
+    function calculateNumberOfTerminalCols() {
+        const ctx = document.createElement("canvas").getContext('2d');
+        ctx.font = '16px';
+        const fontWidth = ctx.measureText('h').width + 1;
+        const windowWidth = window.innerWidth;
+        return Math.floor(windowWidth * ((windowWidth > 600) ? 0.5 : 0.7) / fontWidth);
+    }
+
 }
 
 function setUpTermEventHandlers() {
@@ -130,7 +152,7 @@ function setUpTermEventHandlers() {
         historyIndex = commandHistory.push(line.text);
         const recognisedCommands = ['shalvah'];
         if (!recognisedCommands.includes(argv[0])) {
-            term.write('Unknown command: ' + argv[0]);
+            term.writeln('Unknown command: ' + argv[0]);
             term.emit('line-processed');
             return;
         }
@@ -243,7 +265,6 @@ function setUpShims() {
 
 function setUpTermUi() {
     term.open(document.getElementById('terminal'));
-    term.fit();
     term.writeThenPrompt('');
     term.focus();
 }
