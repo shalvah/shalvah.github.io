@@ -50,7 +50,7 @@ function createTerminal() {
     const term = new Terminal({
         cursorBlink: true,
         convertEol: true,
-        fontFamily: 'Consolas',
+        fontFamily: "monospace",
         fontSize: '16',
         rows: calculateNumberOfTerminalRows(),
         cols: calculateNumberOfTerminalCols(),
@@ -84,10 +84,10 @@ function createTerminal() {
 
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
-        ctx.font = '16px';
+        ctx.font = '16px monospace';
         const fontWidth = ctx.measureText('h').width + 1;
         const windowWidth = screen.width;
-        return Math.floor(windowWidth * ((windowWidth > 600) ? 0.5 : 0.7) / fontWidth);
+        return Math.floor(windowWidth * ((windowWidth > 600) ? 0.6 : 0.9) / fontWidth);
     }
 
 }
