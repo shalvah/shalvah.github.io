@@ -42,9 +42,6 @@ window.currentDirectoryPath = 'root';
 window.process = process;
 window.term = term;
 
-alert(screen.height)
-alert(screen.width)
-
 function createTerminal() {
     const Terminal = require('xterm').Terminal;
 
@@ -81,15 +78,15 @@ function createTerminal() {
         testElement.style.fontSize = '16px';
         let fontHeight = testElement.clientHeight + 1;
         testElement.remove();
-        return Math.floor(screen.height * 0.8 / fontHeight);
+        return Math.floor(screen.height * 0.8 / fontHeight) - 2;
     }
 
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
         ctx.font = '16px monospace';
         const fontWidth = ctx.measureText('h').width + 1;
-        const windowWidth = screen.width;
-        return Math.floor(windowWidth * ((windowWidth > 600) ? 0.6 : 0.9) / fontWidth);
+        const screenWidth = screen.width;
+        return Math.floor(screenWidth * ((screenWidth > 600) ? 0.5 : 0.8) / fontWidth);
     }
 
 }
