@@ -78,14 +78,14 @@ function createTerminal() {
         testElement.style.fontSize = '16px';
         let fontHeight = testElement.clientHeight + 1;
         testElement.remove();
-        return Math.floor(window.innerHeight * 0.8 / fontHeight);
+        return Math.floor(screen.height * 0.8 / fontHeight);
     }
 
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
         ctx.font = '16px';
         const fontWidth = ctx.measureText('h').width + 1;
-        const windowWidth = window.innerWidth;
+        const windowWidth = screen.width;
         return Math.floor(windowWidth * ((windowWidth > 600) ? 0.5 : 0.7) / fontWidth);
     }
 
