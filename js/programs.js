@@ -12,7 +12,7 @@ const shalvah = (args) => {
     process.stdout.write(shalvah.bio + '\r\n');
     inquirer.prompt({
         name: 'link',
-        type: 'list',
+        type: (screen.width > 600) ? 'list' : 'rawlist',
         message: shalvah.prompt,
         choices: shalvah.links.concat({
             'name': `...Or shoot me an email (${shalvah.email})`,
@@ -30,11 +30,6 @@ const help = (args) => {
     process.stdout.emit('line-processed');
 };
 
-function resetSudo() {
-    window.PROMPT_CHAR = '>';
-    window.sudo = false;
-}
-
 const exit = (args) => {
     if (window.sudo) {
         resetSudo();
@@ -46,18 +41,18 @@ const exit = (args) => {
 };
 
 const ls = (args) => {
-    if (args[1] === undefined) {
+    if (args[0] === undefined) {
         process.stdout.write(getContents(window.currentDirectory));
     } else {
-        process.stdout.write(getContents(args[1]));
+        process.stdout.write(getContents(args[0]));
     }
     process.stdout.write('\r\n');
     process.stdout.emit('line-processed');
 };
 
 const cd = (args) => {
-    if (args[1]) {
-        changeDirectory(args[1]);
+    if (args[0]) {
+        changeDirectory(args[0]);
     }
     process.stdout.emit('line-processed');
 };
@@ -111,7 +106,8 @@ function changeDirectory(to) {
 
 function getContents(path) {
     if (path.toString() === '[object Object]') {
-        return Object.keys(path).join(' ');
+        // no files in our fake tree, so just add the slash to everyting
+        return Object.keys(path).map(s => s + '/').join(' ');
     } else if (typeof path === 'string') {
         if (path === '/') {
             return window.paths;
@@ -125,6 +121,11 @@ function getContents(path) {
     } else {
         return `Cannot access ${path}: no such file or directory`;
     }
+}
+
+function resetSudo() {
+    window.PROMPT_CHAR = '>';
+    window.sudo = false;
 }
 
 module.exports = {

@@ -31,7 +31,7 @@ window.paths = {
     home: {},
     lib: {},
     mnt: {},
-    root: {},
+    root: {'.ssh': {} },
     usr: {bin: {}, lib: {}},
     var: {log: {}}
 };
@@ -50,7 +50,7 @@ function createTerminal() {
         cursorBlink: true,
         convertEol: true,
         fontFamily: "monospace",
-        fontSize: '16',
+        fontSize: '15',
         rows: calculateNumberOfTerminalRows(),
         cols: calculateNumberOfTerminalCols(),
     });
@@ -75,18 +75,18 @@ function createTerminal() {
         testElement.innerText = 'h';
         testElement.style.visibility = 'hidden';
         document.querySelector('.term-container').append(testElement);
-        testElement.style.fontSize = '16px';
+        testElement.style.fontSize = '15px';
         let fontHeight = testElement.clientHeight + 1;
         testElement.remove();
-        return Math.floor(screen.height * 0.8 / fontHeight) - 2;
+        return Math.floor(screen.availHeight * 0.8 / fontHeight) - 2;
     }
 
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
-        ctx.font = '16px monospace';
+        ctx.font = '15px monospace';
         const fontWidth = ctx.measureText('h').width + 1;
-        const screenWidth = screen.width;
-        return Math.floor(screenWidth * ((screenWidth > 600) ? 0.5 : 0.8) / fontWidth);
+        const screenWidth = screen.availWidth;
+        return Math.floor(screenWidth * ((screenWidth > 600) ? 0.6 : 0.8) / fontWidth);
     }
 
 }
@@ -94,6 +94,10 @@ function createTerminal() {
 function setUpTermEventHandlers() {
 
     term.on('key', (key, ev) => {
+        const isPrintable = (
+            !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey
+        );
+
         if (process.running) {
             if (ev.ctrlKey && ev.key === 'c') {
                 term.emit('SIGINT');
@@ -107,22 +111,29 @@ function setUpTermEventHandlers() {
             } else if (Number(ev.key)) {
                 ev.value = ev.key;
             }
+            console.log({ ev, key })
             if (ev.key === 'Enter') {
                 // There's a wweird bug I'm experiencing
                 // where the first two triggers of this 'line' event
                 // are being ignored; hence the hack
-                term.emit('line');
-                term.emit('line');
-                term.emit('line');
+                term.emit('line', term.textarea.value);
+                term.emit('line', term.textarea.value);
+                term.emit('line', term.textarea.value);
+            } else if (ev.key === 'Backspace') {
+                // confession: this implementation of Backspace is buggy; 🙈
+                // it only works when the cursor is at line's
+
+                // don't delete the prompt!
+                if (term.buffer.x > stripAnsi(PROMPT()).length) {
+                    term.write('\b \b');
+                }
+                const value = term.textarea.value;
+                term.textarea.value = value.slice(0, value.length - 1);
             } else {
                 term.emit('keypress', key, ev);
             }
             return;
         }
-
-        const printable = (
-            !ev.altKey && !ev.altGraphKey && !ev.ctrlKey && !ev.metaKey
-        );
 
         if (ev.key === 'Enter') {
             term.newLine();
@@ -146,7 +157,7 @@ function setUpTermEventHandlers() {
                 showHistoryItem(++historyIndex);
                 console.log(historyIndex)
             }
-        } else if (printable) {
+        } else if (isPrintable) {
             if (term.textarea.value.split(/\s+/).length < 2 && key !== ' ') {
                 term.write(chalk[COLOURS.command](key));
             } else {
@@ -283,7 +294,7 @@ function setUpTermUi() {
     const titleBarElement = document.querySelector('.title-bar');
     titleBarElement.style.width = terminalElement.clientWidth;
     titleBarElement.style.display = 'block';
-    term.writeThenPrompt("Shalvah CLI 1.0. Try playing around with the terminal to see what's in the box. If you're stuck, type 'help' for a list of commands. Type 'exit' to quit.\r\n");
+    term.writeThenPrompt("Try playing around with the terminal to see what's available. If you're stuck, type 'help' for a list of commands. Type 'exit' to quit.\r\n");
     term.focus();
 }
 
@@ -304,7 +315,6 @@ function showHistoryItem(index) {
 
 function startTerminalSession() {
     term.writeln(chalk[COLOURS.command]('npm') + ' install -g shalvah');
-    term.writeln('');
     term.writeln('added 1 package in 0.00s');
     term.writeThenPrompt('');
 }
@@ -327,7 +337,7 @@ const shalvah = (args) => {
     process.stdout.write(shalvah.bio + '\r\n');
     inquirer.prompt({
         name: 'link',
-        type: 'list',
+        type: (screen.width > 600) ? 'list' : 'rawlist',
         message: shalvah.prompt,
         choices: shalvah.links.concat({
             'name': `...Or shoot me an email (${shalvah.email})`,
@@ -345,11 +355,6 @@ const help = (args) => {
     process.stdout.emit('line-processed');
 };
 
-function resetSudo() {
-    window.PROMPT_CHAR = '>';
-    window.sudo = false;
-}
-
 const exit = (args) => {
     if (window.sudo) {
         resetSudo();
@@ -361,18 +366,18 @@ const exit = (args) => {
 };
 
 const ls = (args) => {
-    if (args[1] === undefined) {
+    if (args[0] === undefined) {
         process.stdout.write(getContents(window.currentDirectory));
     } else {
-        process.stdout.write(getContents(args[1]));
+        process.stdout.write(getContents(args[0]));
     }
     process.stdout.write('\r\n');
     process.stdout.emit('line-processed');
 };
 
 const cd = (args) => {
-    if (args[1]) {
-        changeDirectory(args[1]);
+    if (args[0]) {
+        changeDirectory(args[0]);
     }
     process.stdout.emit('line-processed');
 };
@@ -426,7 +431,8 @@ function changeDirectory(to) {
 
 function getContents(path) {
     if (path.toString() === '[object Object]') {
-        return Object.keys(path).join(' ');
+        // no files in our fake tree, so just add the slash to everyting
+        return Object.keys(path).map(s => s + '/').join(' ');
     } else if (typeof path === 'string') {
         if (path === '/') {
             return window.paths;
@@ -440,6 +446,11 @@ function getContents(path) {
     } else {
         return `Cannot access ${path}: no such file or directory`;
     }
+}
+
+function resetSudo() {
+    window.PROMPT_CHAR = '>';
+    window.sudo = false;
 }
 
 module.exports = {
