@@ -25,12 +25,12 @@ const shalvah = (args) => {
     });
 };
 
-const help = (args) => {
+const help = () => {
     process.stdout.write('Available commands: pwd, cd, ls, shalvah, help');
     process.stdout.emit('line-processed');
 };
 
-const exit = (args) => {
+const exit = () => {
     if (window.sudo) {
         resetSudo();
         process.stdout.emit('line-processed');
@@ -57,7 +57,7 @@ const cd = (args) => {
     process.stdout.emit('line-processed');
 };
 
-const pwd = (args) => {
+const pwd = () => {
     process.stdout.write('/' + window.currentDirectoryPath + '\r\n');
     process.stdout.emit('line-processed');
 };
