@@ -8,6 +8,6 @@ I built this using [Xterm.js](https://xtermjs.org/) for the command-line UI, and
 
 Finally, I plugged in [shalvah](http://github.com/shalvah/shalvah), my SaaNP (Site-as-an-NPM-Package —okay, I coined that) for the content.
 
-[Here's a post on how I built this.](https://dev.to/shalvah/i-had-nothing-better-to-do-so-i-made-my-website-into-an-npm-package-heres-how-4g4b-temp-slug-1956712) 
+[Here's a post on how I built this.](https://dev.to/shalvah/i-was-bored-so-i-made-my-website-into-a-node-package-heres-how-2id3) 
 
 Thanks for dropping by! [Say hi on Twitter](https://twitter.com/intent/tweet?text=Hey%20@theshalvah) if you like it!
