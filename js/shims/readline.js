@@ -18,7 +18,7 @@ module.exports = {
       input.setPrompt = function () {};
       input._getCursorPos = function () {
           return {
-              cols: input.buffer.x,
+              cols: (process.running && !input.textarea.value.length) ? window.rawPrompt.length : input.buffer.x,
               rows: input.buffer.y
           };
       };
