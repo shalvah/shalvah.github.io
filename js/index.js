@@ -67,6 +67,10 @@ function createTerminal() {
 
     return term;
 
+    /*
+     * This measures the height of a single character using a div's height
+     * and uses that to figure out how many rows can fit in about 80% of the screen
+     */
     function calculateNumberOfTerminalRows() {
         let testElement = document.createElement('div');
         testElement.innerText = 'h';
@@ -78,6 +82,10 @@ function createTerminal() {
         return Math.floor(screen.availHeight * 0.8 / fontHeight) - 2;
     }
 
+    /*
+     * This measures the width of a single character using canvas
+     * and uses that to figure out how many columns can fit in about 60% (80% for mobile) of the screen
+     */
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
         ctx.font = '14px monospace';
@@ -238,6 +246,10 @@ function setUpShims() {
      * We're tricking them into thinking xterm is a TTY
      */
     term.isTTY = true;
+
+    /*
+     * Xterm is both our input and output
+     */
     process.stdout = process.stdin = process.stderr = term;
 
     /*
