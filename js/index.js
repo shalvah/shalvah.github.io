@@ -1,5 +1,4 @@
 const chalk = require('chalk');
-const stripAnsi = require('strip-ansi');
 
 const COLOURS = {
     user: 'red',
@@ -8,8 +7,8 @@ const COLOURS = {
 };
 window.PROMPT_CHAR = '>';
 const PROMPT = () => {
-    let pwd;
-    pwd = window.hasChangedDirectory ? '/' + window.currentDirectoryPath : '~';
+    let pwd = window.hasChangedDirectory ? '/' + window.currentDirectoryPath : '~';
+    window.rawPrompt = `root @ ${pwd} ${PROMPT_CHAR} `;
     return `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd](pwd)} ${PROMPT_CHAR} `;
 };
 
@@ -48,7 +47,7 @@ function createTerminal() {
         cursorBlink: true,
         convertEol: true,
         fontFamily: "monospace",
-        fontSize: '15',
+        fontSize: '14',
         rows: calculateNumberOfTerminalRows(),
         cols: calculateNumberOfTerminalCols(),
     });
@@ -73,7 +72,7 @@ function createTerminal() {
         testElement.innerText = 'h';
         testElement.style.visibility = 'hidden';
         document.querySelector('.term-container').append(testElement);
-        testElement.style.fontSize = '15px';
+        testElement.style.fontSize = '14px';
         let fontHeight = testElement.clientHeight + 1;
         testElement.remove();
         return Math.floor(screen.availHeight * 0.8 / fontHeight) - 2;
@@ -81,15 +80,34 @@ function createTerminal() {
 
     function calculateNumberOfTerminalCols() {
         const ctx = document.createElement("canvas").getContext('2d');
-        ctx.font = '15px monospace';
+        ctx.font = '14px monospace';
         const fontWidth = ctx.measureText('h').width + 1;
         const screenWidth = screen.availWidth;
-        return Math.floor(screenWidth * ((screenWidth > 600) ? 0.6 : 0.8) / fontWidth);
+        return Math.floor(screenWidth * ((screenWidth > 600) ? 0.6 : 0.8) / fontWidth) + 3;
     }
 
 }
 
 function setUpTermEventHandlers() {
+
+    term.attachCustomKeyEventHandler((ev) => {
+        if (process.running) {
+            if (ev.key === 'ArrowUp') {
+                ev.name = 'up';
+            } else if (ev.key === 'ArrowDown') {
+                ev.name = 'down';
+            } else if (Number(ev.key)) {
+                ev.value = ev.key;
+                term.write(ev.key);
+
+                // emit this for inquirer
+                term.emit('keypress');
+
+                // stop propagation
+                return false;
+            }
+        }
+    });
 
     term.on('key', (key, ev) => {
         const isPrintable = (
@@ -102,14 +120,6 @@ function setUpTermEventHandlers() {
                 return;
             }
 
-            if (ev.key === 'ArrowUp') {
-                ev.name = 'up';
-            } else if (ev.key === 'ArrowDown') {
-                ev.name = 'down';
-            } else if (Number(ev.key)) {
-                ev.value = ev.key;
-            }
-            console.log({ ev, key })
             if (ev.key === 'Enter') {
                 // There's a wweird bug I'm experiencing
                 // where the first two triggers of this 'line' event
@@ -122,7 +132,7 @@ function setUpTermEventHandlers() {
                 // it only works when the cursor is at line's
 
                 // don't delete the prompt!
-                if (term.buffer.x > stripAnsi(PROMPT()).length) {
+                if (term.buffer.x > window.rawPrompt.length) {
                     term.write('\b \b');
                 }
                 const value = term.textarea.value;
@@ -140,7 +150,7 @@ function setUpTermEventHandlers() {
             // it only works when the cursor is at line's
 
             // don't delete the prompt!
-            if (term.buffer.x > stripAnsi(PROMPT()).length) {
+            if (term.buffer.x > window.rawPrompt.length) {
                 term.write('\b \b');
             }
             const value = term.textarea.value;
@@ -299,7 +309,7 @@ function setUpTermUi() {
 function showHistoryItem(index) {
     let text = commandHistory[index] === undefined ? '' : commandHistory[index];
     let i = term.buffer.x;
-    while (i > stripAnsi(PROMPT()).length) {
+    while (i > window.rawPrompt.length) {
         term.write('\b \b');
         i--;
     }
