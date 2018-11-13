@@ -18,7 +18,7 @@
     "commander": "^2.16.0",
     "inquirer": "^6.0.0",
     "lodash.get": "^4.4.2",
-    "shalvah": "^1.0.2",
+    "shalvah": "github:shalvah/shalvah",
     "xterm": "^3.4.1"
   },
   "devDependencies": {
