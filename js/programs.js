@@ -1,6 +1,7 @@
 'use strict';
 
 const get = require('lodash.get');
+const TRIM = /^\/*|\/*$/g;
 
 const shalvah = (args) => {
     const program = require('commander');
@@ -42,7 +43,7 @@ const exit = () => {
 
 const ls = (args) => {
     if (args[0] === undefined) {
-        process.stdout.write(getContents(window.currentDirectory));
+        process.stdout.write(listContents(window.currentDirectory));
     } else {
         process.stdout.write(getContents(args[0]));
     }
@@ -71,56 +72,53 @@ const rm = (args) => {
     process.stdout.emit('line-processed');
 };
 
-function changeDirectory(to) {
-    if (to === '~') {
-        window.currentDirectory = window.paths.root;
-        window.currentDirectoryPath = 'root';
-        window.hasChangedDirectory = false;
-        return;
+function resolvePath(from, path) {
+    let absPath;
+    if (path.startsWith('/')) {
+        absPath = path;
+    } else if (path === '~' || path.startsWith('~/')) {
+        absPath = 'root' + path.substring(1 /* '~'.length */);
+    } else {
+        absPath = from === '' ? path : `${from}/${path}`;
     }
+    return absPath.replace(TRIM, '');
+}
 
+function changeDirectory(to) {
     if (to === '/') {
         window.currentDirectory = window.paths;
         window.currentDirectoryPath = '';
-        window.hasChangedDirectory = true;
         return;
     }
 
-    let currentPath = window.currentDirectoryPath.replace('/', '.');
-    let newDirectoryPath;
-    if (to.startsWith('/')) {
-        newDirectoryPath = to.trim('/').replace('/', '.');
-    } else {
-        newDirectoryPath = currentPath === '' ? to.trim('/') : `${currentPath}.${to}`;
-    }
-    const newDirectory = get(window.paths, newDirectoryPath);
+    const newDirectoryPath = resolvePath(window.currentDirectoryPath, to);
+    const newDirectory = get(window.paths, newDirectoryPath.split('/'));
     if (!newDirectory) {
         process.stdout.write(`No such file or directory: ${to}`);
         return;
     }
 
     window.currentDirectory = newDirectory;
-    window.currentDirectoryPath = newDirectoryPath.replace('.', '/');
-    window.hasChangedDirectory = true;
+    window.currentDirectoryPath = newDirectoryPath;
+}
+
+function listContents(directory) {
+    // no files in our fake tree, so just add the slash to everyting
+    return Object.keys(directory).map(s => s + '/').join(' ');
 }
 
 function getContents(path) {
-    if (path.toString() === '[object Object]') {
-        // no files in our fake tree, so just add the slash to everyting
-        return Object.keys(path).map(s => s + '/').join(' ');
-    } else if (typeof path === 'string') {
-        if (path === '/') {
-            return window.paths;
-        } else if (path.startsWith('/')) {
-            path = path.trim('/');
-            return getContents(get(window.paths, path.replace('/', '.')));
-        } else {
-            path = window.currentDirectoryPath + '/' + path;
-            return getContents(get(window.paths, path.replace('/', '.')));
-        }
-    } else {
+    if (path === '/') {
+        return listContents(window.paths);
+    }
+
+    let absPath = resolvePath(window.currentDirectoryPath, path);
+    let target = get(window.paths, absPath.split('/'));
+    if (!target) {
         return `Cannot access ${path}: no such file or directory`;
     }
+
+    return listContents(target);
 }
 
 function resetSudo() {
