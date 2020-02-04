@@ -5,9 +5,18 @@ const COLOURS = {
     pwd: 'blue',
     command: 'cyan',
 };
+const USER_DIR_RE = /^root(?=$|\/)/;
+window.currentDirectoryPath = 'root';
+
 window.PROMPT_CHAR = '>';
 const PROMPT = () => {
-    let pwd = window.hasChangedDirectory ? '/' + window.currentDirectoryPath : '~';
+    let pwd = window.currentDirectoryPath;
+    if (USER_DIR_RE.test(pwd)) {
+        pwd = '~' + pwd.substring(4 /* 'root'.length */);
+    } else {
+        pwd = '/' + pwd;
+    }
+
     window.rawPrompt = `root @ ${pwd} ${PROMPT_CHAR} `;
     return `${chalk[COLOURS.user]('root')} @ ${chalk[COLOURS.pwd](pwd)} ${PROMPT_CHAR} `;
 };
@@ -33,7 +42,6 @@ window.paths = {
     var: {log: {}}
 };
 window.currentDirectory = window.paths.root;
-window.currentDirectoryPath = 'root';
 
 // just attaching these for easy inspection on the fly
 window.process = process;
@@ -338,4 +346,3 @@ function startTerminalSession() {
     term.writeln('added 1 package in 0.00s');
     term.writeThenPrompt('');
 }
-
