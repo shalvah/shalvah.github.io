@@ -1,24 +1,22 @@
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="dist/xterm.css"/>
     <title>Shalvah</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Software engineer. All-round awesome." />
-    <meta name="google-site-verification" content="p_wrr5KPEcKPF6ffMfZfGkASqFY6oVSa2tClHCWD764" />
+    <meta name="description" content="Software engineer. All-round awesome."/>
+    <meta name="google-site-verification" content="p_wrr5KPEcKPF6ffMfZfGkASqFY6oVSa2tClHCWD764"/>
+    <meta charset="UTF-8">
 </head>
 
 <style>
     html, body {
         width: 100%;
-        height: 100vh;
+        height: 100%;
         text-align: center;
-        padding: 0;
         margin: 0;
-        background-color: darkslategrey;
+        background-color: lightgrey;
     }
 
     .content {
-        height: 90%;
         padding: 20px;
         display: flex;
         align-items: center;
@@ -26,45 +24,74 @@
         font-family: 'Trebuchet MS', Calibri, sans-serif;
     }
 
-    #terminal {
-        box-shadow: 0 5px 6px 3px;
-        border: 10px solid;
-        border-top: 4px solid;
-        filter: opacity(90%)
+    li {
+        list-style: none;
+        line-height: 1.7;
     }
-
-    .title-bar {
-        border: 0;
-        background-color: white;
-        border-radius: 5px 5px 0 0;
-        margin: 0;
-        padding: 2px 10px;
-        text-align: left;
-        font-size: 12px;
-        box-shadow: 0 5px 6px 3px;
-        display: none;
-    }
-
-    footer {
-        flex-grow: 1;
-    }
-
-    .term-container {
-        text-align: center;
-    }
-
 </style>
 <body>
+
 <div class="content">
-    <div class="title-bar">root @ localhost</div>
-    <div class="term-container">
-        <div id="terminal"></div>
-    </div>
+    <h1>Hi, I'm Shalvah. I build software stuff.</h1>
+
+    <h2>Some products I've built:</h2>
+
+    <ul>
+        <li><a href="https://oldtweets.today">#TwitterThrowback</a>—see what you've tweeted on any day in the past.</li>
+        <li><a href="https://remindmeofthis.app">@RemindMe_OfThis</a>, Twitter bot to easily set reminders.</li>
+        <li><a href="https://thisvid.space">@this_vid</a>, Twitter bot to easily download videos from Tweets.</li>
+        <li><a href="https://usetentacle.app">Tentacle</a>—a single email a week containing new content from all the
+            blogs you follow.
+        </li>
+    </ul>
+
+    <h2>I also work on open-source a lot. Here's some stuff I'm on:</h2>
+
+    <ul>
+        <li><a href="https://github.com/shalvah/clara">Clara</a>—simple, pretty console output for PHP CLI apps.</li>
+
+        <li><a href="https://github.com/shalvah/burns">Burns</a>—application event management library for Node.js</li>
+
+        <li><a href="https://github.com/shalvah/twittersignin">twittersignin</a>: Implement sign in with Twitter in Node.js AND keep your sanity, at the same time.
+        </li>
+
+        <li><a href="https://github.com/shalvah/twitter-error-handler">twitter-error-handler</a>: Properly handle error responses from by the Twitter API (Node.js).
+        </li>
+
+        <li><a href="https://github.com/shalvah/strive">strive</a>: Simple library for automatically trying different approaches to achieve a result.
+        </li>
+
+        <li><a href="https://github.com/shalvah/aargh">aargh</a>: Selectively handle errors in JavaScript.
+        </li>
+
+        <li>
+            <a href="https://github.com/shalvah/ype">ype</a>: Simple library for runtime type assertions in Node.js
+        </li>
+
+        <li>
+            <a href="https://github.com/shalvah/ensure">ensure</a>: Enforce business requirements in PHP using a clean alternative syntax
+        </li>
+
+        <li><a href="https://github.com/shalvah/elastic-stack-starter-kit">elastic-stack-starter-kit
+        </a>: Elastic Stack components + web apps to help you get started.
+        </li>
+
+    </ul>
+
+    <h2>And I've compiled a few lists:</h2>
+
+    <ul>
+        <li><a href="https://github.com/shalvah/indie-tools">Low-cost, high-quality tools for people building products
+            on a budget.</a></li>
+        <li><a href="https://github.com/shalvah/Free-for-students">Software you can get for free as a student.</a></li>
+    </ul>
+
     <br>
-    <footer>
-        <a href="https://dev.to/shalvah/i-was-bored-so-i-made-my-website-into-a-node-package-heres-how-2id3" style="color: white;">How I built this site</a>
-    </footer>
+
+    <p>
+    You can follow me <a href="https://twitter.com/theshalvah">on Twitter</a>, but be warned, I tweet a lot of uncensored shit. You're probably better off following my blogs (<a href="https://dev.to/shalvah">dev.to</a> and <a href="https://medium.com/@shalvah">Medium</a>).
+    </p>
 </div>
-<script src="dist/bundle.js"></script>
+
 </body>
 </html>
